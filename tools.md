@@ -47,6 +47,7 @@ curl -k https://example.com/
 # extract JSON field (requires jq)
 curl -s http://example.com/api | jq -r '.flag // .message // "No flag"'
 ```
+---
 ## 2. Decrypt / Decode
 
 ### Base64
@@ -77,6 +78,48 @@ Example:
 ```bash
 echo '7069636f' > hex.txt && xxd -r -p hex.txt > out.bin && strings out.bin
 ```
+
+### hexdumb
+
+Display the raw bytes of a file in hexadecimal and ASCII.
+
+```bash
+# show first 16 bytes in canonical hex+ASCII format
+hexdump -C -n 16 file
+
+# full hex dump
+hexdump -C file
+
+# hex only, no ASCII
+hexdump -v -e '1/1 "%02x "' file
+```
+
+Example (check magic bytes):
+
+```bash
+hexdump -C -n 8 file
+```
+
+### dd
+
+Low-level tool to copy, extract, or overwrite specific bytes in a file.
+
+```bash
+# overwrite the first 2 bytes of a file
+printf "\xFF\xD8" | dd of=file bs=1 count=2 conv=notrunc
+
+# extract a specific byte range
+dd if=file of=chunk.bin bs=1 skip=100 count=50
+
+# raw copy
+dd if=input.bin of=output.bin
+```
+
+Notes:
+- `bs=1` → operate byte-by-byte
+- `skip=` → number of bytes to skip
+- `count=` → number of bytes to read
+- `conv=notrunc` → do not truncate the output file (critical when editing headers)
 
 ---
 
