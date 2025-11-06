@@ -1,5 +1,7 @@
 # Log Hunt
 
+**Link**: https://play.picoctf.org/practice/challenge/527
+
 **Difficulty**: easy
 
 ## Description

@@ -1,5 +1,7 @@
 # Hidden in plainsight
 
+**Link**: https://play.picoctf.org/practice/challenge/524
+
 **Difficulty**: easy
 
 ## Description

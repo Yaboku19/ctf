@@ -1,5 +1,7 @@
 # Hashcrack
 
+**Link**: https://play.picoctf.org/practice/challenge/475
+
 **Difficulty**: easy
 
 ## Description

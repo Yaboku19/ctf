@@ -1,5 +1,7 @@
 # Riddle Registry
 
+**Link**: https://play.picoctf.org/practice/challenge/530
+
 **Difficulty**: Easy
 
 ## Description

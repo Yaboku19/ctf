@@ -1,5 +1,7 @@
 # Flag in Flame
 
+**Link**: https://play.picoctf.org/practice/challenge/523
+
 **Difficulty**: easy
 
 ## Description

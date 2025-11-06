@@ -1,5 +1,7 @@
 # Disko 1
 
+**Link**: https://play.picoctf.org/practice/challenge/505
+
 **Difficulty**: easy
 
 ## Description

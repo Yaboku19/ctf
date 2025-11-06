@@ -1,5 +1,7 @@
 # SSTI1
 
+**Link**: https://play.picoctf.org/practice/challenge/492
+
 **Difficulty**: easy
 
 ## Description
