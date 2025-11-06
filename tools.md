@@ -19,6 +19,34 @@ nc <domain> <port>
 
 ---
 
+## Curl
+
+```bash
+# simple GET
+curl -sS http://example.com/
+
+# save headers + body
+curl -sS -D headers.txt http://example.com/ -o body.html
+
+# POST JSON
+curl -s -X POST http://example.com/api -H "Content-Type: application/json" -d '{"k":"v"}'
+
+# add/modify header
+curl -s -H "X-Dev-Access: yes" http://example.com/
+
+# save/reuse cookies
+curl -s -c cookies.txt -X POST http://example.com/login -d "u=a&p=b"
+curl -s -b cookies.txt http://example.com/dashboard
+
+# verbose / follow redirects
+curl -v -L http://example.com/
+
+# ignore TLS (dev/CTF)
+curl -k https://example.com/
+
+# extract JSON field (requires jq)
+curl -s http://example.com/api | jq -r '.flag // .message // "No flag"'
+```
 ## 2. Decrypt / Decode
 
 ### Base64

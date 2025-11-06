@@ -13,64 +13,54 @@ Download the logs and figure out the full flag from the fragments.
 
 ## How to solve
 
-The flag should be in the format ```picoCTF{...}```, so by running grep:
+Start by searching the log for anything already containing the `picoCTF` prefix:
 
-```bash
-grep "picoCTF" server.log
-```
+    grep "picoCTF" server.log
 
-The output will be
+The output shows several repeated fragments:
 
-```bash
-[1990-08-09 10:00:10] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:04:27] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:04:29] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:04:37] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:19:23] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:19:29] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:19:32] INFO FLAGPART: picoCTF{us3_
-```
+    [1990-08-09 10:00:10] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:04:27] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:04:29] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:04:37] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:19:23] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:19:29] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:19:32] INFO FLAGPART: picoCTF{us3_
 
-It easy to see that everytime there is a piece of the flag the tag ```FLAGPART``` appear. So by running
+Each partial flag appears next to the tag `FLAGPART`, so extract all lines containing it:
 
-```bash
-grep "FLAGPART" server.log
-```
+    grep "FLAGPART" server.log
 
-The output will be
+This reveals all parts of the flag appearing throughout the log:
 
-```bash
-[1990-08-09 10:00:10] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 10:02:55] INFO FLAGPART: y0urlinux_
-[1990-08-09 10:05:54] INFO FLAGPART: sk1lls_
-[1990-08-09 10:05:55] INFO FLAGPART: sk1lls_
-[1990-08-09 10:10:54] INFO FLAGPART: cedfa5fb}
-[1990-08-09 10:10:58] INFO FLAGPART: cedfa5fb}
-[1990-08-09 10:11:06] INFO FLAGPART: cedfa5fb}
-[1990-08-09 11:04:27] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:04:29] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:04:37] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 11:09:16] INFO FLAGPART: y0urlinux_
-[1990-08-09 11:09:19] INFO FLAGPART: y0urlinux_
-[1990-08-09 11:12:40] INFO FLAGPART: sk1lls_
-[1990-08-09 11:12:45] INFO FLAGPART: sk1lls_
-[1990-08-09 11:16:58] INFO FLAGPART: cedfa5fb}
-[1990-08-09 11:16:59] INFO FLAGPART: cedfa5fb}
-[1990-08-09 11:17:00] INFO FLAGPART: cedfa5fb}
-[1990-08-09 12:19:23] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:19:29] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:19:32] INFO FLAGPART: picoCTF{us3_
-[1990-08-09 12:23:43] INFO FLAGPART: y0urlinux_
-[1990-08-09 12:23:45] INFO FLAGPART: y0urlinux_
-[1990-08-09 12:23:53] INFO FLAGPART: y0urlinux_
-[1990-08-09 12:25:32] INFO FLAGPART: sk1lls_
-[1990-08-09 12:28:45] INFO FLAGPART: cedfa5fb}
-[1990-08-09 12:28:49] INFO FLAGPART: cedfa5fb}
-[1990-08-09 12:28:52] INFO FLAGPART: cedfa5fb}
-```
+    [1990-08-09 10:00:10] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 10:02:55] INFO FLAGPART: y0urlinux_
+    [1990-08-09 10:05:54] INFO FLAGPART: sk1lls_
+    [1990-08-09 10:05:55] INFO FLAGPART: sk1lls_
+    [1990-08-09 10:10:54] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 10:10:58] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 10:11:06] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 11:04:27] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:04:29] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:04:37] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 11:09:16] INFO FLAGPART: y0urlinux_
+    [1990-08-09 11:09:19] INFO FLAGPART: y0urlinux_
+    [1990-08-09 11:12:40] INFO FLAGPART: sk1lls_
+    [1990-08-09 11:12:45] INFO FLAGPART: sk1lls_
+    [1990-08-09 11:16:58] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 11:16:59] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 11:17:00] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 12:19:23] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:19:29] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:19:32] INFO FLAGPART: picoCTF{us3_
+    [1990-08-09 12:23:43] INFO FLAGPART: y0urlinux_
+    [1990-08-09 12:23:45] INFO FLAGPART: y0urlinux_
+    [1990-08-09 12:23:53] INFO FLAGPART: y0urlinux_
+    [1990-08-09 12:25:32] INFO FLAGPART: sk1lls_
+    [1990-08-09 12:28:45] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 12:28:49] INFO FLAGPART: cedfa5fb}
+    [1990-08-09 12:28:52] INFO FLAGPART: cedfa5fb}
 
-And the flag will be easy to be recostruct
+From these repeated segments, the full flag can be reconstructed in order:
 
-```bash
-picoCTF{us3_y0urlinux_sk1lls_cedfa5fb}
-```
+    picoCTF{us3_y0urlinux_sk1lls_cedfa5fb}

@@ -13,62 +13,39 @@ Download the encoded data here: Logs Data. Be prepared—the file is large, and 
 
 ## How to solve
 
-By running
+By running:
 
-```bash
-cat logs.txt
-```
+    cat logs.txt
 
-The output will be
+The output will be:
 
-```bash
-iVBORw0KGgoAAAANSUhEUgAAA4AAAASACAIAAAAh8bSOAAEAAElEQ....
-```
+    iVBORw0KGgoAAAANSUhEUgAAA4AAAASACAIAAAAh8bSOAAEAAElEQ....
 
-It looks like it is in base64 format.
+It looks like Base64. Decode and check the file type:
 
-By running
+    cat logs.txt | base64 -d | head
 
-```bash
-cat logs.txt | base64 -d | head
-```
+The output will start with PNG magic bytes:
 
-The output will be
+    �PNG
+    ␦
+    ...
 
-```bash
-�PNG
-␦
-...
-```
+Save the decoded data as a PNG:
 
-It shows that indeed the file was in base64 and that the file decripted is a png file.
+    cat logs.txt | base64 -d > img.png
 
-By running
+Open `img.png` (or inspect it) and you’ll see a long hexadecimal string:
 
-```bash
-cat logs.txt | base64 -d > img.png
-```
+    7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D
 
-The file will be converted in a png file.
+Save that hex into `tmp.txt` and convert it to binary, then show readable text:
 
-By looking at the image it is easy to see a string
+    echo "7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D" > tmp.txt
+    xxd -r -p tmp.txt > result.bin
+    strings result.bin
+    cat result.bin
 
-```
-7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D
-```
+The final output (the flag) will be:
 
-It looks exadecimal. 
-
-So by saving the string in a file called ```tmp.txt``` and running
-
-```bash
-xxd -r -p tmp.txt > result.bin
-strings result.bin
-cat result.bin
-```
-
-The output will be
-
-```bash
-picoCTF{forensics_analysis_is_amazing_ac1e3584}
-```
+    picoCTF{forensics_analysis_is_amazing_ac1e3584}

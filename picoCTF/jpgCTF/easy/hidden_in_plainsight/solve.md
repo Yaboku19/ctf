@@ -14,112 +14,78 @@ You’re given a seemingly ordinary JPG image. Something is tucked away out of s
 
 Search for the metadata
 
-```bash
-exiftool img.jpg
-```
+    exiftool img.jpg
 
 The output will be:
 
-```bash
-ExifTool Version Number         : 12.76
-File Name                       : img.jpg
-Directory                       : .
-File Size                       : 74 kB
-File Modification Date/Time     : 2025:11:04 17:46:06+00:00
-File Access Date/Time           : 2025:11:04 17:46:08+00:00
-File Inode Change Date/Time     : 2025:11:04 17:46:06+00:00
-File Permissions                : -rw-rw-r--
-File Type                       : JPEG
-File Type Extension             : jpg
-MIME Type                       : image/jpeg
-JFIF Version                    : 1.01
-Resolution Unit                 : None
-X Resolution                    : 1
-Y Resolution                    : 1
-Comment                         : c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9
-Image Width                     : 640
-Image Height                    : 640
-Encoding Process                : Baseline DCT, Huffman coding
-Bits Per Sample                 : 8
-Color Components                : 3
-Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
-Image Size                      : 640x640
-Megapixels                      : 0.410
-```
+    ExifTool Version Number         : 12.76
+    File Name                       : img.jpg
+    Directory                       : .
+    File Size                       : 74 kB
+    File Modification Date/Time     : 2025:11:04 17:46:06+00:00
+    File Access Date/Time           : 2025:11:04 17:46:08+00:00
+    File Inode Change Date/Time     : 2025:11:04 17:46:06+00:00
+    File Permissions                : -rw-rw-r--
+    File Type                       : JPEG
+    File Type Extension             : jpg
+    MIME Type                       : image/jpeg
+    JFIF Version                    : 1.01
+    Resolution Unit                 : None
+    X Resolution                    : 1
+    Y Resolution                    : 1
+    Comment                         : c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9
+    Image Width                     : 640
+    Image Height                    : 640
+    Encoding Process                : Baseline DCT, Huffman coding
+    Bits Per Sample                 : 8
+    Color Components                : 3
+    Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
+    Image Size                      : 640x640
+    Megapixels                      : 0.410
 
-The comment section looks encrypted in base64.
+The `Comment` field looks like Base64. Decode it:
 
-So, by running:
+    echo 'c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9' | base64 -d
 
-```bash
-echo 'c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9' | base64 -d
-```
+The output will be:
 
-The output wil be
+    steghide:cEF6endvcmQ=u
 
-```bash
-steghide:cEF6endvcmQ=u
-```
+Decode the second part:
 
-There still looks like that the second part of the string is still encrypted.
+    echo 'cEF6endvcmQ=u' | base64 -d
 
-By running
+The output will be:
 
-```bash
-echo 'cEF6endvcmQ=u' | base64 -d
-```
+    pAzzword
 
-The output wil be
+The comment reveals `steghide:pAzzword`. Use `steghide` with that password:
 
-```bash
-pAzzword
-```
+    steghide info img.jpg -p pAzzword
 
-so the comment section decrypted is saying ```steghide:pAzzword```
+The output will be:
 
-steghide is a tool for getting hidden informations inside a file.
+    "img.jpg":
+      format: jpeg
+      capacity: 4.0 KB
+      embedded file "flag.txt":
+        size: 34.0 Byte
+        encrypted: rijndael-128, cbc
+        compressed: yes
 
-By running
+Extract the hidden file:
 
-```bash
-steghide info img.jpg -p pAzzword
-```
+    steghide extract -sf img.jpg -p pAzzword
 
-The output will be
+The output will be:
 
-```bash
-"img.jpg":
-  format: jpeg
-  capacity: 4.0 KB
-  embedded file "flag.txt":
-    size: 34.0 Byte
-    encrypted: rijndael-128, cbc
-    compressed: yes
-```
-There is a file called ```flag.txt``` hidden inside the file.
+    wrote extracted data to "flag.txt".
 
-By running
+Read the flag:
 
-```bash
-steghide extract -sf img.jpg -p pAzzword
-```
+    cat flag.txt
 
-The output will be
+The output will be:
 
-```bash
-wrote extracted data to "flag.txt".
-```
+    picoCTF{h1dd3n_1n_1m4g3_871ba555}
 
-It created a file called ```flag.txt``` with the hidden information inside.
-
-By running 
-
-```bash
-cat flag.txt
-```
-
-The output will be the flag 
-
-```
-picoCTF{h1dd3n_1n_1m4g3_871ba555}
-```

@@ -13,45 +13,37 @@ Find the PDF file here and uncover the flag within the metadata.
 
 ## How to solve
 
-The text clearly sends an hint. It says to see for metadata.
+The challenge hint suggests checking the file’s metadata.
 
 By running:
 
-```bash
-pdfinfo confidential.pdf
-```
+    pdfinfo confidential.pdf
 
-The output will be
+The output will be:
 
-```bash
-Author:          cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=
-Producer:        PyPDF2
-Custom Metadata: no
-Metadata Stream: no
-Tagged:          no
-UserProperties:  no
-Suspects:        no
-Form:            none
-JavaScript:      no
-Pages:           1
-Encrypted:       no
-Page size:       612 x 792 pts (letter)
-Page rot:        0
-File size:       182705 bytes
-Optimized:       no
-PDF version:     1.7
-```
+    Author:          cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=
+    Producer:        PyPDF2
+    Custom Metadata: no
+    Metadata Stream: no
+    Tagged:          no
+    UserProperties:  no
+    Suspects:        no
+    Form:            none
+    JavaScript:      no
+    Pages:           1
+    Encrypted:       no
+    Page size:       612 x 792 pts (letter)
+    Page rot:        0
+    File size:       182705 bytes
+    Optimized:       no
+    PDF version:     1.7
 
-The Author looks like it is crypted. In fact it is in base64 format.
+The `Author` field clearly looks encoded, and its format matches Base64.
 
-By running:
+Decode it:
 
-```bash
-echo 'cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=' | base64 -d
-```
+    echo 'cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=' | base64 -d
 
-The output will be the flag
+The decoded value is the flag:
 
-```bash
-picoCTF{puzzl3d_m3tadata_f0und!_f94300c4}
-```
+    picoCTF{puzzl3d_m3tadata_f0und!_f94300c4}
