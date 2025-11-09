@@ -36,6 +36,7 @@ curl -s -H "X-Dev-Access: yes" http://example.com/
 
 # save/reuse cookies
 curl -s -c cookies.txt -X POST http://example.com/login -d "u=a&p=b"
+curl -s -D - -c cookies.txt 'site'
 curl -s -b cookies.txt http://example.com/dashboard
 
 # verbose / follow redirects
