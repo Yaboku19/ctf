@@ -10,9 +10,9 @@ Can you use your knowledge of format strings to make the customers happy?
 
 ## Resources
 
-**chall**: binary file
+**format-string-0**: binary file
 
-**chall.c**: source code
+**format-string-0.c**: source code
 
 ## How to solve
 
