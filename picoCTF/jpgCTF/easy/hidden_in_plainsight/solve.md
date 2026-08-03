@@ -1,4 +1,4 @@
-# Hidden in plainsight
+# Hidden in Plainsight
 
 **Link**: https://play.picoctf.org/practice/challenge/524
 
@@ -6,88 +6,41 @@
 
 ## Description
 
-You’re given a seemingly ordinary JPG image. Something is tucked away out of sight inside the file. Your task is to discover the hidden payload and extract the flag.
+You're given a seemingly ordinary JPG image. Something is tucked away out of sight
+inside the file. Your task is to discover the hidden payload and extract the flag.
 
 ## Resources
 
-**img.jpg**: an image
+- **img.jpg**: the image with an embedded, password-protected file
+- **flag.txt**: the extracted flag (produced during the solve)
 
 ## How to solve
 
-Search for the metadata
+The trick is two-layered: the metadata tells you **which tool and password** to use,
+and the actual flag is embedded with `steghide`.
 
-    exiftool img.jpg
+1. **Read the metadata:**
 
-The output will be:
+       exiftool img.jpg
 
-    ExifTool Version Number         : 12.76
-    File Name                       : img.jpg
-    Directory                       : .
-    File Size                       : 74 kB
-    File Modification Date/Time     : 2025:11:04 17:46:06+00:00
-    File Access Date/Time           : 2025:11:04 17:46:08+00:00
-    File Inode Change Date/Time     : 2025:11:04 17:46:06+00:00
-    File Permissions                : -rw-rw-r--
-    File Type                       : JPEG
-    File Type Extension             : jpg
-    MIME Type                       : image/jpeg
-    JFIF Version                    : 1.01
-    Resolution Unit                 : None
-    X Resolution                    : 1
-    Y Resolution                    : 1
-    Comment                         : c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9
-    Image Width                     : 640
-    Image Height                    : 640
-    Encoding Process                : Baseline DCT, Huffman coding
-    Bits Per Sample                 : 8
-    Color Components                : 3
-    Y Cb Cr Sub Sampling            : YCbCr4:2:0 (2 2)
-    Image Size                      : 640x640
-    Megapixels                      : 0.410
+   The `Comment` field is Base64:
 
-The `Comment` field looks like Base64. Decode it:
+       Comment : c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9
 
-    echo 'c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9' | base64 -d
+2. **Decode the comment** — it points at `steghide` and gives a second Base64 blob:
 
-The output will be:
+       echo 'c3RlZ2hpZGU6Y0VGNmVuZHZjbVE9' | base64 -d      # -> steghide:cEF6endvcmQ=
 
-    steghide:cEF6endvcmQ=u
+3. **Decode that inner part** to get the steghide password:
 
-Decode the second part:
+       echo 'cEF6endvcmQ=' | base64 -d                       # -> pAzzword
 
-    echo 'cEF6endvcmQ=u' | base64 -d
+4. **Extract with steghide** using password `pAzzword`:
 
-The output will be:
+       steghide info    img.jpg -p pAzzword      # shows embedded flag.txt (34 bytes)
+       steghide extract -sf img.jpg -p pAzzword  # writes flag.txt
+       cat flag.txt
 
-    pAzzword
-
-The comment reveals `steghide:pAzzword`. Use `steghide` with that password:
-
-    steghide info img.jpg -p pAzzword
-
-The output will be:
-
-    "img.jpg":
-      format: jpeg
-      capacity: 4.0 KB
-      embedded file "flag.txt":
-        size: 34.0 Byte
-        encrypted: rijndael-128, cbc
-        compressed: yes
-
-Extract the hidden file:
-
-    steghide extract -sf img.jpg -p pAzzword
-
-The output will be:
-
-    wrote extracted data to "flag.txt".
-
-Read the flag:
-
-    cat flag.txt
-
-The output will be:
+## Flag
 
     picoCTF{h1dd3n_1n_1m4g3_871ba555}
-

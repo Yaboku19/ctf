@@ -2,50 +2,36 @@
 
 **Link**: https://play.picoctf.org/practice/challenge/530
 
-**Difficulty**: Easy
+**Difficulty**: easy
 
 ## Description
 
-Hi, intrepid investigator! 📄🔍 You've stumbled upon a peculiar PDF filled with what seems like nothing more than garbled nonsense. But beware! Not everything is as it appears. Amidst the chaos lies a hidden treasure—an elusive flag waiting to be uncovered.
-Find the PDF file here and uncover the flag within the metadata.
+You've stumbled upon a peculiar PDF filled with what seems like nothing more than
+garbled nonsense. Amidst the chaos lies a hidden treasure—an elusive flag waiting
+to be uncovered in the metadata.
 
 ## Resources
 
-**confidential.pdf**: pdf file with the flag
+- **confidential.pdf**: the PDF hiding the flag in its metadata
 
 ## How to solve
 
-The challenge hint suggests checking the file’s metadata.
+1. The description points straight at the **metadata**, so dump it:
 
-By running:
+       pdfinfo confidential.pdf
 
-    pdfinfo confidential.pdf
+   The `Author` field stands out — it's a Base64 string (mixed case, `+`/`/`,
+   trailing `=` padding):
 
-The output will be:
+       Author:   cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=
+       Producer: PyPDF2
 
-    Author:          cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=
-    Producer:        PyPDF2
-    Custom Metadata: no
-    Metadata Stream: no
-    Tagged:          no
-    UserProperties:  no
-    Suspects:        no
-    Form:            none
-    JavaScript:      no
-    Pages:           1
-    Encrypted:       no
-    Page size:       612 x 792 pts (letter)
-    Page rot:        0
-    File size:       182705 bytes
-    Optimized:       no
-    PDF version:     1.7
+2. **Decode it:**
 
-The `Author` field clearly looks encoded, and its format matches Base64.
+       echo 'cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=' | base64 -d
 
-Decode it:
+> `exiftool confidential.pdf` shows the same field if `pdfinfo` isn't installed.
 
-    echo 'cGljb0NURntwdXp6bDNkX20zdGFkYXRhX2YwdW5kIV9mOTQzMDBjNH0=' | base64 -d
-
-The decoded value is the flag:
+## Flag
 
     picoCTF{puzzl3d_m3tadata_f0und!_f94300c4}

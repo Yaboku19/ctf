@@ -1,4 +1,4 @@
-# Printer share
+# Printer Shares
 
 **Link**: https://play.picoctf.org/practice/challenge/759
 
@@ -6,28 +6,43 @@
 
 ## Description
 
-Oops! Someone accidentally sent an important file to a network printer—can you retrieve it from the print server?
+Oops! Someone accidentally sent an important file to a network printer—can you
+retrieve it from the print server?
 
 ## Resources
 
+None — everything happens over the network. The instance exposes an **SMB** print
+server.
 
 ## How to solve
 
-The serve just give the nc command
+1. Confirm the port is open (the challenge hands you host/port):
 
-    nc -vz mysterious-sea.picoctf.net PORT
+       nc -vz mysterious-sea.picoctf.net PORT
 
-Here subclient can be used
+2. **List the SMB shares** with `smbclient` using a null session (`-N` = no
+   password):
 
-For listing the available machines
+       smbclient -L //mysterious-sea.picoctf.net -p PORT -N
 
-    smbclient -L //mysterious-sea.picoctf.net -p 52883 -N
+   This lists the available shares (e.g. a `shares` / print share).
 
-This one for connect to one of the machine.
+3. **Connect to the interesting share:**
 
-    smbclient //mysterious-sea.picoctf.net/shares -p PORT -N
+       smbclient //mysterious-sea.picoctf.net/shares -p PORT -N
 
-You for reading a file before neads to be downloaded with
+4. Inside the `smb: \>` prompt, list and **download** the file (SMB doesn't print
+   file contents inline — you `get` it to disk first, then read it locally):
 
-    getting file \flag.txt of size 37 as flag.txt
+       smb: \> ls
+       smb: \> get flag.txt
+       getting file \flag.txt of size 37 as flag.txt (…)
+       smb: \> exit
 
+5. Read the downloaded file:
+
+       cat flag.txt
+
+## Flag
+
+    picoCTF{...}   (contents of the retrieved flag.txt)

@@ -6,48 +6,45 @@
 
 ## Description
 
-The SOC team discovered a suspiciously large log file after a recent breach. When they opened it, they found an enormous block of encoded text instead of typical logs. Could there be something hidden within? Your mission is to inspect the resulting file and reveal the real purpose of it. The team is relying on your skills to uncover any concealed information within this unusual log.
-Download the encoded data here: Logs Data. Be prepared—the file is large, and examining it thoroughly is crucial .
+The SOC team discovered a suspiciously large log file after a recent breach. When
+they opened it, they found an enormous block of encoded text instead of typical
+logs. Could there be something hidden within? The file is large, so examining it
+thoroughly is crucial.
 
 ## Resources
 
-**logs.txt**: a log file
+- **logs.txt**: the "log" file (actually one giant Base64 blob)
+- **img.png**: the decoded image (produced during the solve)
+- **result.bin**: the final decoded flag bytes (produced during the solve)
 
 ## How to solve
 
-By running:
+This is a nested-encoding chain: **Base64 → PNG image → hex string → ASCII flag.**
 
-    cat logs.txt
+1. **Recognise the Base64.** The whole file is one block starting with `iVBORw0KGgo…`
+   — and `iVBORw0KGgo` is the Base64 of a PNG header (`\x89PNG`):
 
-The output will be:
+       head -c 80 logs.txt          # iVBORw0KGgoAAAANSUhEUgAAA4A...
 
-    iVBORw0KGgoAAAANSUhEUgAAA4AAAASACAIAAAAh8bSOAAEAAElEQ....
+2. **Decode and confirm the file type:**
 
-It looks like Base64. Decode and check the file type:
+       base64 -d logs.txt | head    # starts with the PNG magic bytes ‰PNG
 
-    cat logs.txt | base64 -d | head
+3. **Save the PNG and open it:**
 
-The output will start with PNG magic bytes:
+       base64 -d logs.txt > img.png
 
-    �PNG
-    ␦
-    ...
+   The image shows a long **hex string**:
 
-Save the decoded data as a PNG:
+       7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D
 
-    cat logs.txt | base64 -d > img.png
+   (`70 69 63 6F` = `pico`, so we already know it decodes to the flag. If the string
+   is only rendered as pixels, OCR it with `tesseract img.png out` or just read it.)
 
-Open `img.png` (or inspect it) and you’ll see a long hexadecimal string:
+4. **Hex → ASCII:**
 
-    7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D
+       echo "7069636F4354467B...347D" | xxd -r -p
 
-Save that hex into `tmp.txt` and convert it to binary, then show readable text:
-
-    echo "7069636F4354467B666F72656E736963735F616E616C797369735F69735F616D617A696E675F61633165333538347D" > tmp.txt
-    xxd -r -p tmp.txt > result.bin
-    strings result.bin
-    cat result.bin
-
-The final output (the flag) will be:
+## Flag
 
     picoCTF{forensics_analysis_is_amazing_ac1e3584}

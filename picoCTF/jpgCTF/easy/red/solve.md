@@ -1,6 +1,6 @@
 # RED
 
-**Link**: https://play.picoctf.org/practice/challenge/460?page=2
+**Link**: https://play.picoctf.org/practice/challenge/460
 
 **Difficulty**: easy
 
@@ -10,85 +10,48 @@ RED, RED, RED, RED
 
 ## Resources
 
-**red.png**: the image for the challenge8
+- **red.png**: a 128×128 solid-red PNG
 
 ## How to solve
 
-By running 
+Two stages: an acrostic hint in the metadata, then LSB steganography.
 
-    exiftool red.png
+1. **Read the metadata** — there's a custom `Poem` field:
 
-The output will be
+       exiftool red.png
 
-    ExifTool Version Number         : 12.76
-    File Name                       : red.png
-    Directory                       : .
-    File Size                       : 796 bytes
-    File Modification Date/Time     : 2025:11:07 21:30:40+00:00
-    File Access Date/Time           : 2025:11:08 21:34:43+00:00
-    File Inode Change Date/Time     : 2025:11:07 21:30:40+00:00
-    File Permissions                : -rw-rw-r--
-    File Type                       : PNG
-    File Type Extension             : png
-    MIME Type                       : image/png
-    Image Width                     : 128
-    Image Height                    : 128
-    Bit Depth                       : 8
-    Color Type                      : RGB with Alpha
-    Compression                     : Deflate/Inflate
-    Filter                          : Adaptive
-    Interlace                       : Noninterlaced
-    Poem                            : Crimson heart, vibrant and bold,.Hearts flutter at your sight..Evenings glow softly red,.Cherries burst with sweet life..Kisses linger with your warmth..Love deep as merlot..Scarlet leaves falling softly,.Bold in every stroke.
-    Image Size                      : 128x128
-    Megapixels                      : 0.016
+   View it with line breaks preserved:
 
-To view the poem with proper line breaks, run:
+       exiftool -b -Poem red.png
 
-    exiftool -b -Poem red.png
+       Crimson heart, vibrant and bold,
+       Hearts flutter at your sight.
+       Evenings glow softly red,
+       Cherries burst with sweet life.
+       Kisses linger with your warmth.
+       Love deep as merlot.
+       Scarlet leaves falling softly,
+       Bold in every stroke.
 
-The output will be
+2. **Read the acrostic** — the first letter of each line spells the next step:
 
-    Crimson heart, vibrant and bold,
-    Hearts flutter at your sight.
-    Evenings glow softly red,
-    Cherries burst with sweet life.
-    Kisses linger with your warmth.
-    Love deep as merlot.
-    Scarlet leaves falling softly,
-    Bold in every stroke.
+       C H E C K   L S B   ->  "check lsb"
 
-Looking at the first letter of every line gives:
+3. **Extract the LSB data** with `zsteg` (for PNGs):
 
-    check lsb
+       zsteg red.png
 
-This suggests checking the least significant bits of the PNG. By running
+   The `b1,rgba,lsb,xy` channel holds a repeated Base64 string:
 
-    zsteg red.png
+       cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==
 
-The output will be
+4. **Decode it:**
 
-    meta Poem           .. text: "Crimson heart, vibrant and bold,\nHearts flutter at your sight.\nEvenings glow softly red,\nCherries burst with sweet life.\nKisses linger with your warmth.\nLove deep as merlot.\nScarlet leaves falling softly,\nBold in every stroke."
-    b1,rgba,lsb,xy      .. text: "cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ=="
-    b1,rgba,msb,xy      .. file: OpenPGP Public Key
-    b2,g,lsb,xy         .. text: "ET@UETPETUUT@TUUTD@PDUDDDPE"
-    b2,rgb,lsb,xy       .. file: OpenPGP Secret Key
-    b2,bgr,msb,xy       .. file: OpenPGP Public Key
-    b2,rgba,lsb,xy      .. file: OpenPGP Secret Key
-    b2,rgba,msb,xy      .. text: "CIkiiiII"
-    b2,abgr,lsb,xy      .. file: OpenPGP Secret Key
-    b2,abgr,msb,xy      .. text: "iiiaakikk"
-    b3,rgba,msb,xy      .. text: "#wb#wp#7p"
-    b3,abgr,msb,xy      .. text: "7r'wb#7p"
-    b4,b,lsb,xy         .. file: 0421 Alliant compact executable not stripped
+       echo 'cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==' | base64 -d
 
-There is a repeated base64 string:
+> Install if needed: `gem install zsteg`. For a quick one-shot on the LSB plane you
+> could also use `zsteg -E b1,rgba,lsb,xy red.png`.
 
-    cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ==
-
-Decode it by running:
-
-    echo cGljb0NURntyM2RfMXNfdGgzX3VsdDFtNHQzX2N1cjNfZjByXzU0ZG4zNTVffQ== | base64 -d
-
-The output will be:
+## Flag
 
     picoCTF{r3d_1s_th3_ult1m4t3_cur3_f0r_54dn355_}

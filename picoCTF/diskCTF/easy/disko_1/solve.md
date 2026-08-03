@@ -7,22 +7,30 @@
 ## Description
 
 Can you find the flag in this disk image?
-Download the disk image here.
 
 ## Resources
 
-**disko-1.dd.gz**: the disk
+- **disko-1.dd.gz**: the gzip-compressed disk image (extracts to `disko-1.dd`)
 
 ## How to solve
 
-unzip the the disk
+1. Decompress the disk image:
 
-    gunzip disko-1.dd.gz
+       gunzip disko-1.dd.gz
 
-Then let's search for the flag
+2. The flag is stored as plain text somewhere on the filesystem, so a raw string
+   search across the whole image finds it without mounting anything:
 
-    strings disko-1.dd | grep -i pico
+       strings disko-1.dd | grep -i pico
 
-in the output there will be
+   Output:
+
+       picoCTF{1t5_ju5t_4_5tr1n9_c63b02ef}
+
+> If `grep` had come up empty, the next steps would be to inspect the partition
+> table (`fdisk -l disko-1.dd`), carve files with `binwalk -e` / `foremost`, or
+> mount it read-only (`sudo mount -o ro,loop disko-1.dd /mnt`).
+
+## Flag
 
     picoCTF{1t5_ju5t_4_5tr1n9_c63b02ef}
